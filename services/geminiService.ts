@@ -7,7 +7,11 @@ export class GeminiService {
   private ai: GoogleGenAI;
 
   constructor() {
-    this.ai = new GoogleGenAI({ apiKey: process.env.API_KEY || '' });
+    const apiKey = process.env.GEMINI_API_KEY || process.env.API_KEY;
+    if (!apiKey) {
+      console.warn("Gemini API key is missing. Chat features will not work.");
+    }
+    this.ai = new GoogleGenAI({ apiKey: apiKey || 'dummy-key' });
   }
 
   async sendMessage(message: string, history: ChatMessage[] = []) {

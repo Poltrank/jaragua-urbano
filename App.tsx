@@ -76,6 +76,19 @@ const App: React.FC = () => {
   const getRule = (key: keyof typeof DEFAULT_RULES) => ruleOverrides[key] || DEFAULT_RULES[key];
   const getDiscount = (key: keyof typeof DEFAULT_DISCOUNTS) => discountOverrides[key] || DEFAULT_DISCOUNTS[key];
 
+  const colorMap: Record<string, { bg: string, text: string, border: string, lightBg: string, lightText: string, lightBorder: string, darkBg: string }> = {
+    rose: { bg: 'bg-rose-600', text: 'text-rose-600', border: 'border-rose-600', lightBg: 'bg-rose-50', lightText: 'text-rose-700', lightBorder: 'border-rose-100', darkBg: 'bg-rose-900' },
+    purple: { bg: 'bg-purple-600', text: 'text-purple-600', border: 'border-purple-600', lightBg: 'bg-purple-50', lightText: 'text-purple-700', lightBorder: 'border-purple-100', darkBg: 'bg-purple-900' },
+    emerald: { bg: 'bg-emerald-600', text: 'text-emerald-600', border: 'border-emerald-600', lightBg: 'bg-emerald-50', lightText: 'text-emerald-700', lightBorder: 'border-emerald-100', darkBg: 'bg-emerald-900' },
+    amber: { bg: 'bg-amber-600', text: 'text-amber-600', border: 'border-amber-600', lightBg: 'bg-amber-50', lightText: 'text-amber-700', lightBorder: 'border-amber-100', darkBg: 'bg-amber-900' },
+    orange: { bg: 'bg-orange-600', text: 'text-orange-600', border: 'border-orange-600', lightBg: 'bg-orange-50', lightText: 'text-orange-700', lightBorder: 'border-orange-100', darkBg: 'bg-orange-900' },
+    blue: { bg: 'bg-blue-600', text: 'text-blue-600', border: 'border-blue-600', lightBg: 'bg-blue-50', lightText: 'text-blue-700', lightBorder: 'border-blue-100', darkBg: 'bg-blue-900' },
+    slate: { bg: 'bg-slate-600', text: 'text-slate-600', border: 'border-slate-600', lightBg: 'bg-slate-50', lightText: 'text-slate-700', lightBorder: 'border-slate-100', darkBg: 'bg-slate-900' },
+    indigo: { bg: 'bg-indigo-600', text: 'text-indigo-600', border: 'border-indigo-600', lightBg: 'bg-indigo-50', lightText: 'text-indigo-700', lightBorder: 'border-indigo-100', darkBg: 'bg-indigo-900' },
+  };
+
+  const getColor = (color: string = 'emerald') => colorMap[color] || colorMap.emerald;
+
   const handleUpdateImage = (key: string, url: string) => {
     const newOverrides = { ...imageOverrides, [key]: url };
     setImageOverrides(newOverrides);
@@ -384,10 +397,10 @@ const App: React.FC = () => {
       </nav>
 
       {/* Voucher Generation Modal */}
-      {showCpfModal && (
+      {showCpfModal && selectedPromo && (
         <div className="fixed inset-0 z-[200] flex items-center justify-center p-4 bg-slate-900/80 backdrop-blur-md animate-in fade-in">
           <div className="bg-white w-full max-w-md rounded-[2.5rem] overflow-hidden shadow-2xl">
-            <div className={`p-10 bg-${selectedPromo?.color}-600 text-white text-center`}>
+            <div className={`p-10 ${getColor(selectedPromo.color).bg} text-white text-center`}>
               <div className="w-16 h-16 bg-white/20 rounded-full flex items-center justify-center mx-auto mb-4 backdrop-blur-sm"><i className="fas fa-id-card text-2xl"></i></div>
               <h3 className="text-2xl font-black mb-1">Resgate Imediato</h3>
               <p className="text-xs opacity-70 font-bold uppercase tracking-widest">Apenas 1 voucher por CPF</p>
@@ -396,7 +409,7 @@ const App: React.FC = () => {
               <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-4 block">Confirme seu CPF para validar</label>
               <input type="tel" value={cpfInput} onChange={(e) => setCpfInput(formatCpf(e.target.value))} placeholder="000.000.000-00" className={`w-full text-3xl font-mono text-center border-b-4 py-3 focus:outline-none ${error ? 'border-rose-500 text-rose-500' : 'border-slate-100 focus:border-emerald-500 text-slate-800'}`} />
               {error && <p className="text-rose-500 text-[10px] mt-4 font-black text-center">{error}</p>}
-              <button onClick={handleGenerateVoucher} className={`w-full mt-10 py-5 rounded-3xl font-black text-white shadow-xl bg-${selectedPromo?.color}-600`}>GERAR MEU VOUCHER AGORA</button>
+              <button onClick={handleGenerateVoucher} className={`w-full mt-10 py-5 rounded-3xl font-black text-white shadow-xl ${getColor(selectedPromo.color).bg}`}>GERAR MEU VOUCHER AGORA</button>
               <button onClick={() => setShowCpfModal(false)} className="w-full mt-6 py-2 text-slate-400 font-black text-[10px] uppercase">Talvez mais tarde</button>
             </div>
           </div>
@@ -408,14 +421,14 @@ const App: React.FC = () => {
         <div className="fixed inset-0 z-[300] flex items-center justify-center p-4 bg-slate-900/95 animate-in zoom-in duration-300">
           <div className="w-full max-sm flex flex-col gap-6">
             <div className="bg-white rounded-[3rem] overflow-hidden shadow-2xl relative">
-              <div className={`h-6 bg-${generatedVoucher.color}-600`}></div>
+              <div className={`h-6 ${getColor(generatedVoucher.color).bg}`}></div>
               <div className="p-10 pb-6 text-center border-b-2 border-dashed border-slate-100 relative">
                 <div className="absolute -left-4 -bottom-4 w-8 h-8 bg-slate-900 rounded-full"></div>
                 <div className="absolute -right-4 -bottom-4 w-8 h-8 bg-slate-900 rounded-full"></div>
                 <h4 className="text-[10px] font-black text-emerald-600 uppercase tracking-[0.4em] mb-6">Voucher Oficial Jaraguá</h4>
                 <p className="text-slate-400 text-xs font-black uppercase mb-1">{generatedVoucher.storeName}</p>
                 <div className="text-5xl font-black text-slate-900 mb-4">{generatedVoucher.discount}</div>
-                <div className={`inline-block px-5 py-2 rounded-full text-[10px] font-black bg-${generatedVoucher.color}-50 text-${generatedVoucher.color}-700 uppercase tracking-widest`}>Apresente na Loja</div>
+                <div className={`inline-block px-5 py-2 rounded-full text-[10px] font-black ${getColor(generatedVoucher.color).lightBg} ${getColor(generatedVoucher.color).lightText} uppercase tracking-widest`}>Apresente na Loja</div>
               </div>
               <div className="p-10 pt-8 space-y-6">
                 <div className="bg-slate-50 p-6 rounded-[2rem] border border-slate-100 text-center"><span className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2 block">CÓDIGO DE SEGURANÇA</span><span className="text-3xl font-mono font-black text-slate-800 tracking-widest">{generatedVoucher.code}</span></div>
@@ -442,13 +455,79 @@ const DriverCard: React.FC<{ name: string, specialty: string, vehicle: string, r
   <div className="bg-white rounded-[3rem] p-8 shadow-xl border border-slate-50 flex flex-col gap-6 relative group overflow-hidden"><div className="absolute top-0 right-0 w-32 h-32 bg-slate-50 rounded-full -mr-16 -mt-16 group-hover:bg-indigo-50 transition-all"></div>{verified && <div className="absolute top-6 right-6 bg-emerald-100 text-emerald-700 text-[10px] font-black px-4 py-1.5 rounded-full flex items-center gap-2"><i className="fas fa-check-circle"></i> VERIFICADO</div>}<div className="flex items-center gap-6 relative z-10"><div className="w-20 h-20 bg-slate-100 rounded-3xl flex items-center justify-center text-3xl text-slate-300 overflow-hidden shadow-inner">{img ? <img src={img} className="w-full h-full object-cover" alt={name} /> : <i className="fas fa-user-tie"></i>}</div><div><h3 className="text-xl font-black text-slate-900 leading-tight">{name}</h3><p className="text-xs text-slate-400 font-bold uppercase tracking-wider mt-1">{specialty}</p><div className="flex items-center gap-1.5 text-amber-500 text-sm font-black mt-2"><i className="fas fa-star"></i> {rating}</div></div></div><div className="bg-slate-50 p-6 rounded-3xl space-y-3 relative z-10 border border-slate-100"><div className="flex justify-between items-center text-[11px]"><span className="text-slate-400 font-black uppercase tracking-widest">Veículo</span><span className="text-slate-800 font-black">{vehicle}</span></div>{promo && (<div className="flex justify-between items-center text-[11px] pt-3 border-t border-slate-200/50"><span className="text-indigo-500 font-black uppercase tracking-widest">Oferta</span><span className="bg-indigo-500 text-white px-3 py-1 rounded-full text-[9px] font-black">{promo}</span></div>)}</div><a href={`https://wa.me/${phone}?text=Olá! Vi seu perfil premium no Jaraguá Descontos e gostaria de solicitar uma viagem.`} target="_blank" className="w-full bg-slate-900 hover:bg-indigo-700 text-white py-5 rounded-[2rem] font-black text-center shadow-xl active:scale-95 flex items-center justify-center gap-3 text-xs uppercase tracking-widest"><i className="fab fa-whatsapp text-lg"></i> Agendar Agora</a></div>
 );
 
-const PromoBanner: React.FC<{title: string, location: string, discount: string, rules?: string, badge?: string, code: string, color: string, img: string, onRedeem: () => void}> = ({title, location, discount, rules, badge, color, img, onRedeem}) => (
-  <div className="bg-white rounded-[3rem] overflow-hidden shadow-xl border border-slate-50 flex flex-col md:flex-row group transition-all hover:shadow-2xl"><div className="md:w-2/5 h-64 md:h-auto overflow-hidden relative"><img src={img} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700" alt={title} /><div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent md:hidden"></div>{badge && <div className={`absolute top-6 left-6 bg-${color}-600 text-white text-[10px] font-black px-4 py-1.5 rounded-full shadow-lg`}>{badge}</div>}</div><div className="md:w-3/5 p-8 md:p-12 flex flex-col justify-center bg-white relative"><div><h3 className="text-3xl font-black text-slate-900 mb-1 leading-tight">{title}</h3><p className="text-xs text-slate-400 font-bold uppercase tracking-widest flex items-center gap-2 mb-4"><i className="fas fa-map-marker-alt text-rose-500"></i> {location}</p></div><div className={`text-3xl font-black text-${color}-600 mb-2`}>{discount}</div>{rules && <p className="text-[10px] text-slate-400 font-bold mb-8 italic">{rules}</p>}<div className="flex flex-wrap gap-4"><button onClick={onRedeem} className={`bg-${color}-600 text-white px-10 py-5 rounded-[2rem] font-black text-xs uppercase shadow-xl active:scale-95 transition-all hover:brightness-110`}>PEGAR CUPOM GRATUITO</button></div></div></div>
-);
+const PromoBanner: React.FC<{title: string, location: string, discount: string, rules?: string, badge?: string, code: string, color: string, img: string, onRedeem: () => void}> = ({title, location, discount, rules, badge, color, img, onRedeem}) => {
+  const colorMap: Record<string, string> = {
+    rose: 'bg-rose-600 text-rose-600',
+    purple: 'bg-purple-600 text-purple-600',
+    emerald: 'bg-emerald-600 text-emerald-600',
+    amber: 'bg-amber-600 text-amber-600',
+    orange: 'bg-orange-600 text-orange-600',
+    blue: 'bg-blue-600 text-blue-600',
+    slate: 'bg-slate-600 text-slate-600',
+    indigo: 'bg-indigo-600 text-indigo-600',
+  };
+  
+  const bgClass = colorMap[color]?.split(' ')[0] || 'bg-emerald-600';
+  const textClass = colorMap[color]?.split(' ')[1] || 'text-emerald-600';
 
-const PromoCard: React.FC<{title: string, location?: string, discount: string, rules?: string, code: string, color: string, onRedeem: () => void}> = ({title, location, discount, rules, code, color, onRedeem}) => (
-  <div className="bg-white border border-slate-50 rounded-[2.5rem] p-8 shadow-lg flex flex-col gap-6 relative overflow-hidden group hover:shadow-2xl transition-all"><div className={`absolute top-0 right-0 bg-${color}-600 text-white px-6 py-2 rounded-bl-3xl font-black text-[10px] uppercase`}>{discount}</div><div className="mt-4"><h3 className="text-2xl font-black text-slate-900 mb-1 leading-tight">{title}</h3><p className="text-[10px] text-slate-400 font-bold uppercase tracking-widest">{location ? location : 'Loja Verificada'}</p></div><div className="bg-slate-50 p-6 rounded-[2rem] border-2 border-dashed border-slate-200 text-center"><span className="text-[10px] font-black text-slate-300 uppercase block mb-2">Base do Voucher</span><span className="text-2xl font-mono font-black text-slate-800">{code}</span>{rules && <p className="text-[9px] text-slate-400 mt-2 italic">{rules}</p>}</div><button onClick={onRedeem} className={`bg-${color}-600 text-white py-5 rounded-[2rem] font-black text-xs uppercase active:scale-95 transition-all shadow-md`}>QUERO DESCONTO</button></div>
-);
+  return (
+    <div className="bg-white rounded-[3rem] overflow-hidden shadow-xl border border-slate-50 flex flex-col md:flex-row group transition-all hover:shadow-2xl">
+      <div className="md:w-2/5 h-64 md:h-auto overflow-hidden relative">
+        <img src={img} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700" alt={title} />
+        <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent md:hidden"></div>
+        {badge && <div className={`absolute top-6 left-6 ${bgClass} text-white text-[10px] font-black px-4 py-1.5 rounded-full shadow-lg`}>{badge}</div>}
+      </div>
+      <div className="md:w-3/5 p-8 md:p-12 flex flex-col justify-center bg-white relative">
+        <div>
+          <h3 className="text-3xl font-black text-slate-900 mb-1 leading-tight">{title}</h3>
+          <p className="text-xs text-slate-400 font-bold uppercase tracking-widest flex items-center gap-2 mb-4">
+            <i className="fas fa-map-marker-alt text-rose-500"></i> {location}
+          </p>
+        </div>
+        <div className={`text-3xl font-black ${textClass} mb-2`}>{discount}</div>
+        {rules && <p className="text-[10px] text-slate-400 font-bold mb-8 italic">{rules}</p>}
+        <div className="flex flex-wrap gap-4">
+          <button onClick={onRedeem} className={`${bgClass} text-white px-10 py-5 rounded-[2rem] font-black text-xs uppercase shadow-xl active:scale-95 transition-all hover:brightness-110`}>
+            PEGAR CUPOM GRATUITO
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+const PromoCard: React.FC<{title: string, location?: string, discount: string, rules?: string, code: string, color: string, onRedeem: () => void}> = ({title, location, discount, rules, code, color, onRedeem}) => {
+  const colorMap: Record<string, string> = {
+    rose: 'bg-rose-600',
+    purple: 'bg-purple-600',
+    emerald: 'bg-emerald-600',
+    amber: 'bg-amber-600',
+    orange: 'bg-orange-600',
+    blue: 'bg-blue-600',
+    slate: 'bg-slate-600',
+    indigo: 'bg-indigo-600',
+  };
+  
+  const bgClass = colorMap[color] || 'bg-emerald-600';
+
+  return (
+    <div className="bg-white border border-slate-50 rounded-[2.5rem] p-8 shadow-lg flex flex-col gap-6 relative overflow-hidden group hover:shadow-2xl transition-all">
+      <div className={`absolute top-0 right-0 ${bgClass} text-white px-6 py-2 rounded-bl-3xl font-black text-[10px] uppercase`}>{discount}</div>
+      <div className="mt-4">
+        <h3 className="text-2xl font-black text-slate-900 mb-1 leading-tight">{title}</h3>
+        <p className="text-[10px] text-slate-400 font-bold uppercase tracking-widest">{location ? location : 'Loja Verificada'}</p>
+      </div>
+      <div className="bg-slate-50 p-6 rounded-[2rem] border-2 border-dashed border-slate-200 text-center">
+        <span className="text-[10px] font-black text-slate-300 uppercase block mb-2">Base do Voucher</span>
+        <span className="text-2xl font-mono font-black text-slate-800">{code}</span>
+        {rules && <p className="text-[9px] text-slate-400 mt-2 italic">{rules}</p>}
+      </div>
+      <button onClick={onRedeem} className={`${bgClass} text-white py-5 rounded-[2rem] font-black text-xs uppercase active:scale-95 transition-all shadow-md`}>
+        QUERO DESCONTO
+      </button>
+    </div>
+  );
+};
 
 const BottomNavItem: React.FC<{ icon: string; label: string; active: boolean; onClick: () => void; adminTrigger?: () => void }> = ({ icon, label, active, onClick, adminTrigger }) => (
   <div className="relative flex-1 flex flex-col items-center">
