@@ -1,0 +1,7 @@
+{
+  "name": "Jaraguá Descontos",
+  "description": "O guia digital oficial para descobrir os melhores serviços e economizar com cupons exclusivos em Jaraguá do Sul.",
+  "requestFramePermissions": [
+    "geolocation"
+  ]
+}
