@@ -1,4 +1,5 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
+import { motion, AnimatePresence } from 'motion/react';
 import ChatInterface from './components/ChatInterface';
 import { Voucher } from './types';
 
@@ -198,10 +199,32 @@ const App: React.FC = () => {
 
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
           <div className="lg:col-span-8 space-y-10">
-            <h2 className="text-2xl font-black flex items-center gap-3"><span className="w-2 h-8 bg-emerald-600 rounded-full"></span>Ofertas em Destaque</h2>
-            <PromoBanner title="Lojas Xangai" location="Barra do Rio Cerro" discount={getDiscount('xangai')} rules={getRule('xangai')} badge="TUDO PARA SUA CASA" code="XANGAI10" color="rose" img={getImg('xangai_promo')} onRedeem={() => handleOpenPromo({title: 'Lojas Xangai', discount: getDiscount('xangai'), code: 'XANGAI10', color: 'rose', rules: getRule('xangai')})} />
-            <PromoBanner title="Kart Indoor" location="Shopping Partage" discount={getDiscount('kart')} rules={getRule('kart')} badge="ADRENALINA" code="KARTJGS" color="purple" img={getImg('kart_promo')} onRedeem={() => handleOpenPromo({title: 'Kart Indoor', discount: getDiscount('kart'), code: 'KARTJGS', color: 'purple', rules: getRule('kart')})} />
-            <PromoBanner title="Mestre do Frango" location="Nova Brasília" discount={getDiscount('mestre')} rules={getRule('mestre')} badge="O MAIS PEDIDO" code="MESTRE10" color="emerald" img={getImg('mestre_promo')} onRedeem={() => handleOpenPromo({title: 'Mestre do Frango', discount: getDiscount('mestre'), code: 'MESTRE10', color: 'emerald', rules: getRule('mestre')})} />
+            <h2 className="text-2xl font-black flex items-center gap-3 text-slate-800">
+              <span className="w-2 h-8 bg-emerald-600 rounded-full"></span>
+              Ofertas em Destaque
+            </h2>
+            
+            <PromoCarousel 
+              promos={[
+                { id: 'xangai', title: "Lojas Xangai", location: "Barra do Rio Cerro", discount: getDiscount('xangai'), rules: getRule('xangai'), badge: "TUDO PARA SUA CASA", code: "XANGAI10", color: "rose", img: getImg('xangai_promo') },
+                { id: 'kart', title: "Kart Indoor", location: "Shopping Partage", discount: getDiscount('kart'), rules: getRule('kart'), badge: "ADRENALINA", code: "KARTJGS", color: "purple", img: getImg('kart_promo') },
+                { id: 'mestre', title: "Mestre do Frango", location: "Nova Brasília", discount: getDiscount('mestre'), rules: getRule('mestre'), badge: "O MAIS PEDIDO", code: "MESTRE10", color: "emerald", img: getImg('mestre_promo') },
+                { id: 'chefao', title: "Sr Chefão Salgados", location: "Barra do Rio Cerro", discount: getDiscount('chefao'), rules: getRule('chefao'), badge: "O MELHOR SALGADO", code: "CHEFAOJS", color: "amber", img: getImg('chefao_promo') },
+                { id: 'divinas', title: "Divina´s Pizzaria", location: "Vila Nova", discount: getDiscount('divinas'), rules: getRule('divinas'), badge: "PIZZA ARTESANAL", code: "DIVINA20", color: "orange", img: getImg('divinas_promo') }
+              ]} 
+              onRedeem={(promo) => handleOpenPromo(promo)}
+            />
+
+            <div className="pt-10">
+              <h2 className="text-2xl font-black flex items-center gap-3 text-slate-800 mb-8">
+                <span className="w-2 h-8 bg-amber-500 rounded-full"></span>
+                Explorar por Categoria
+              </h2>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <PromoBanner title="Lojas Xangai" location="Barra do Rio Cerro" discount={getDiscount('xangai')} rules={getRule('xangai')} badge="TUDO PARA SUA CASA" code="XANGAI10" color="rose" img={getImg('xangai_promo')} onRedeem={() => handleOpenPromo({title: 'Lojas Xangai', discount: getDiscount('xangai'), code: 'XANGAI10', color: 'rose', rules: getRule('xangai')})} />
+                <PromoBanner title="Kart Indoor" location="Shopping Partage" discount={getDiscount('kart')} rules={getRule('kart')} badge="ADRENALINA" code="KARTJGS" color="purple" img={getImg('kart_promo')} onRedeem={() => handleOpenPromo({title: 'Kart Indoor', discount: getDiscount('kart'), code: 'KARTJGS', color: 'purple', rules: getRule('kart')})} />
+              </div>
+            </div>
           </div>
           <div className="hidden lg:block lg:col-span-4">
             <div className="sticky top-24 space-y-6">
@@ -436,6 +459,128 @@ const App: React.FC = () => {
   );
 };
 
+const PromoCarousel: React.FC<{ promos: any[], onRedeem: (promo: any) => void }> = ({ promos, onRedeem }) => {
+  const [currentIndex, setCurrentIndex] = useState(0);
+  const [direction, setDirection] = useState(0);
+
+  const slideNext = () => {
+    setDirection(1);
+    setCurrentIndex((prev) => (prev + 1) % promos.length);
+  };
+
+  const slidePrev = () => {
+    setDirection(-1);
+    setCurrentIndex((prev) => (prev - 1 + promos.length) % promos.length);
+  };
+
+  const variants = {
+    enter: (direction: number) => ({
+      x: direction > 0 ? 300 : -300,
+      opacity: 0,
+      scale: 0.9
+    }),
+    center: {
+      zIndex: 1,
+      x: 0,
+      opacity: 1,
+      scale: 1
+    },
+    exit: (direction: number) => ({
+      zIndex: 0,
+      x: direction < 0 ? 300 : -300,
+      opacity: 0,
+      scale: 0.9
+    })
+  };
+
+  return (
+    <div className="relative">
+      <div className="relative h-[440px] md:h-[480px] w-full overflow-hidden rounded-[2.5rem] bg-slate-50/50">
+        <AnimatePresence initial={false} custom={direction}>
+          <motion.div
+            key={currentIndex}
+            custom={direction}
+            variants={variants}
+            initial="enter"
+            animate="center"
+            exit="exit"
+            transition={{
+              x: { type: "spring", stiffness: 300, damping: 30 },
+              opacity: { duration: 0.2 },
+              scale: { duration: 0.3 }
+            }}
+            className="absolute inset-0 flex items-center justify-center p-4"
+          >
+            <div className="w-full max-w-md bg-white rounded-[2rem] shadow-xl border border-slate-100 overflow-hidden flex flex-col h-full">
+              <div className="relative h-48 md:h-56 overflow-hidden">
+                <img 
+                  src={promos[currentIndex].img} 
+                  alt={promos[currentIndex].title} 
+                  className="w-full h-full object-cover"
+                />
+                <div className="absolute top-3 right-3 bg-rose-500 text-white text-[9px] font-black px-3 py-1 rounded-full shadow-lg">
+                  {promos[currentIndex].discount}
+                </div>
+              </div>
+              
+              <div className="p-6 flex flex-col items-center text-center flex-1">
+                <h3 className="text-xl font-black text-emerald-600 mb-1">
+                  {promos[currentIndex].title}
+                </h3>
+                <p className="text-[9px] text-slate-400 font-bold uppercase tracking-widest mb-3">
+                  {promos[currentIndex].location}
+                </p>
+                <div className="text-2xl font-black text-slate-900 mb-3">
+                  {promos[currentIndex].discount}
+                </div>
+                <p className="text-[10px] text-slate-500 font-medium mb-4 line-clamp-2 italic leading-relaxed">
+                  {promos[currentIndex].rules}
+                </p>
+                <button 
+                  onClick={() => onRedeem(promos[currentIndex])}
+                  className="mt-auto w-full bg-emerald-600 hover:bg-emerald-700 text-white py-3.5 rounded-xl font-black text-[10px] uppercase tracking-widest shadow-lg active:scale-95 transition-all"
+                >
+                  RESGATAR AGORA
+                </button>
+              </div>
+            </div>
+          </motion.div>
+        </AnimatePresence>
+
+        {/* Navigation Arrows */}
+        <button 
+          onClick={slidePrev}
+          className="absolute left-4 top-1/2 -translate-y-1/2 w-10 h-10 bg-white/90 backdrop-blur-sm rounded-full shadow-lg flex items-center justify-center text-slate-400 hover:text-emerald-600 z-10 transition-all active:scale-90 border border-slate-100"
+        >
+          <i className="fas fa-chevron-left text-sm"></i>
+        </button>
+        <button 
+          onClick={slideNext}
+          className="absolute right-4 top-1/2 -translate-y-1/2 w-10 h-10 bg-white/90 backdrop-blur-sm rounded-full shadow-lg flex items-center justify-center text-slate-400 hover:text-emerald-600 z-10 transition-all active:scale-90 border border-slate-100"
+        >
+          <i className="fas fa-chevron-right text-sm"></i>
+        </button>
+      </div>
+
+      {/* Pagination Dots */}
+      <div className="flex justify-center gap-1.5 mt-4">
+        {promos.map((_, idx) => (
+          <button
+            key={idx}
+            onClick={() => {
+              setDirection(idx > currentIndex ? 1 : -1);
+              setCurrentIndex(idx);
+            }}
+            className={`h-1.5 rounded-full transition-all duration-300 ${
+              idx === currentIndex ? 'w-6 bg-emerald-600' : 'w-1.5 bg-slate-300'
+            }`}
+          />
+        ))}
+      </div>
+    </div>
+  );
+};
+
 const CategoryQuickLink: React.FC<{ icon: string, label: string, color: string, onClick: () => void }> = ({ icon, label, color, onClick }) => (
   <button onClick={onClick} className="bg-white p-6 rounded-[2rem] shadow-lg border border-slate-50 flex flex-col items-center gap-4 hover:shadow-xl hover:-translate-y-1 transition-all active:scale-95 group w-full"><div className={`w-14 h-14 ${color} text-white rounded-2xl flex items-center justify-center text-xl shadow-inner group-hover:scale-110 transition-transform`}><i className={icon}></i></div><span className="text-xs font-black text-slate-700 uppercase tracking-widest">{label}</span></button>
 );
@@ -445,11 +590,49 @@ const DriverCard: React.FC<{ name: string, specialty: string, vehicle: string, r
 );
 
 const PromoBanner: React.FC<{title: string, location: string, discount: string, rules?: string, badge?: string, code: string, color: string, img: string, onRedeem: () => void}> = ({title, location, discount, rules, badge, color, img, onRedeem}) => (
-  <div className="bg-white rounded-[3rem] overflow-hidden shadow-xl border border-slate-50 flex flex-col md:flex-row group transition-all hover:shadow-2xl"><div className="md:w-2/5 h-64 md:h-auto overflow-hidden relative"><img src={img} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700" alt={title} /><div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent md:hidden"></div>{badge && <div className={`absolute top-6 left-6 bg-${color}-600 text-white text-[10px] font-black px-4 py-1.5 rounded-full shadow-lg`}>{badge}</div>}</div><div className="md:w-3/5 p-8 md:p-12 flex flex-col justify-center bg-white relative"><div><h3 className="text-3xl font-black text-slate-900 mb-1 leading-tight">{title}</h3><p className="text-xs text-slate-400 font-bold uppercase tracking-widest flex items-center gap-2 mb-4"><i className="fas fa-map-marker-alt text-rose-500"></i> {location}</p></div><div className={`text-3xl font-black text-${color}-600 mb-2`}>{discount}</div>{rules && <p className="text-[10px] text-slate-400 font-bold mb-8 italic">{rules}</p>}<div className="flex flex-wrap gap-4"><button onClick={onRedeem} className={`bg-${color}-600 text-white px-10 py-5 rounded-[2rem] font-black text-xs uppercase shadow-xl active:scale-95 transition-all hover:brightness-110`}>PEGAR CUPOM GRATUITO</button></div></div></div>
+  <div className="bg-white rounded-[2rem] overflow-hidden shadow-lg border border-slate-50 flex flex-col group transition-all hover:shadow-xl">
+    <div className="h-48 md:h-56 overflow-hidden relative">
+      <img src={img} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700" alt={title} />
+      <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent"></div>
+      {badge && <div className={`absolute top-4 left-4 bg-${color}-600 text-white text-[8px] font-black px-3 py-1 rounded-full shadow-lg uppercase tracking-tighter`}>{badge}</div>}
+      <div className="absolute top-4 right-4 bg-white/90 backdrop-blur-sm text-slate-900 text-[10px] font-black px-3 py-1 rounded-lg shadow-sm">
+        {discount}
+      </div>
+    </div>
+    <div className="p-6 flex flex-col bg-white">
+      <div className="flex justify-between items-start mb-2">
+        <h3 className="text-lg font-black text-slate-900 leading-tight">{title}</h3>
+      </div>
+      <p className="text-[9px] text-slate-400 font-bold uppercase tracking-widest flex items-center gap-1.5 mb-3">
+        <i className="fas fa-map-marker-alt text-rose-500"></i> {location}
+      </p>
+      <div className={`text-xl font-black text-${color}-600 mb-2`}>{discount}</div>
+      {rules && <p className="text-[9px] text-slate-400 font-bold mb-6 italic line-clamp-1">{rules}</p>}
+      <button onClick={onRedeem} className={`bg-${color}-600 text-white py-3.5 rounded-xl font-black text-[10px] uppercase shadow-md active:scale-95 transition-all hover:brightness-110`}>PEGAR CUPOM</button>
+    </div>
+  </div>
 );
 
 const PromoCard: React.FC<{title: string, location?: string, discount: string, rules?: string, code: string, color: string, onRedeem: () => void}> = ({title, location, discount, rules, code, color, onRedeem}) => (
-  <div className="bg-white border border-slate-50 rounded-[2.5rem] p-8 shadow-lg flex flex-col gap-6 relative overflow-hidden group hover:shadow-2xl transition-all"><div className={`absolute top-0 right-0 bg-${color}-600 text-white px-6 py-2 rounded-bl-3xl font-black text-[10px] uppercase`}>{discount}</div><div className="mt-4"><h3 className="text-2xl font-black text-slate-900 mb-1 leading-tight">{title}</h3><p className="text-[10px] text-slate-400 font-bold uppercase tracking-widest">{location ? location : 'Loja Verificada'}</p></div><div className="bg-slate-50 p-6 rounded-[2rem] border-2 border-dashed border-slate-200 text-center"><span className="text-[10px] font-black text-slate-300 uppercase block mb-2">Base do Voucher</span><span className="text-2xl font-mono font-black text-slate-800">{code}</span>{rules && <p className="text-[9px] text-slate-400 mt-2 italic">{rules}</p>}</div><button onClick={onRedeem} className={`bg-${color}-600 text-white py-5 rounded-[2rem] font-black text-xs uppercase active:scale-95 transition-all shadow-md`}>QUERO DESCONTO</button></div>
+  <div className="bg-white border border-slate-100 rounded-[2rem] p-6 shadow-md flex flex-col gap-4 relative overflow-hidden group hover:shadow-lg transition-all">
+    <div className={`absolute top-0 right-0 bg-${color}-600 text-white px-4 py-1.5 rounded-bl-2xl font-black text-[9px] uppercase shadow-sm`}>
+      {discount}
+    </div>
+    <div className="mt-2">
+      <h3 className="text-lg font-black text-slate-900 mb-1 leading-tight">{title}</h3>
+      <p className="text-[9px] text-slate-400 font-bold uppercase tracking-widest">
+        {location ? location : 'Loja Verificada'}
+      </p>
+    </div>
+    <div className="bg-slate-50 p-4 rounded-2xl border-2 border-dashed border-slate-200 text-center">
+      <span className="text-[8px] font-black text-slate-300 uppercase block mb-1">Código Base</span>
+      <span className="text-xl font-mono font-black text-slate-800 tracking-tighter">{code}</span>
+      {rules && <p className="text-[8px] text-slate-400 mt-1 italic line-clamp-1">{rules}</p>}
+    </div>
+    <button onClick={onRedeem} className={`bg-${color}-600 text-white py-3 rounded-xl font-black text-[10px] uppercase active:scale-95 transition-all shadow-sm hover:brightness-110`}>
+      QUERO DESCONTO
+    </button>
+  </div>
 );
 
 const BottomNavItem: React.FC<{ icon: string; label: string; active: boolean; onClick: () => void; adminTrigger?: () => void }> = ({ icon, label, active, onClick, adminTrigger }) => (
